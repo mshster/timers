@@ -59,6 +59,7 @@
 		2E91777B2F9D50B900C07DBB /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		2E91777D2F9D50B900C07DBB /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		AA9177A02F9D50B900C07DBB /* TimerAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TimerAttributes.swift; path = Timers/Models/TimerAttributes.swift; sourceTree = SOURCE_ROOT; };
+		D032F8980D794277B1125C21 /* LayoutMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LayoutMode.swift; path = Timers/Models/LayoutMode.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -170,6 +171,7 @@
 		2E9177932F9D50E400C07DBB /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				D032F8980D794277B1125C21 /* LayoutMode.swift */,
 				AA9177A02F9D50B900C07DBB /* TimerAttributes.swift */,
 			);
 			path = Models;

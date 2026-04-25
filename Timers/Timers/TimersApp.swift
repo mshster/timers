@@ -7,26 +7,34 @@
 
 import SwiftUI
 import SwiftData
+import UserNotifications
 
 @main
 struct TimersApp: App {
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Item.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
+    @Environment(\.scenePhase) private var scenePhase
+    private let engine = TimerEngine()
 
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environment(engine)
+                .modelContainer(for: TimerProfile.self)
+                .task {
+                    guard !CommandLine.arguments.contains("--uitesting") else { return }
+                    await requestNotificationPermission()
+                }
         }
-        .modelContainer(sharedModelContainer)
+        .onChange(of: scenePhase) { _, newPhase in
+            switch newPhase {
+            case .background: engine.handleBackground()
+            case .active:     engine.handleForeground()
+            default:          break
+            }
+        }
+    }
+
+    private func requestNotificationPermission() async {
+        _ = try? await UNUserNotificationCenter.current()
+            .requestAuthorization(options: [.alert, .sound])
     }
 }

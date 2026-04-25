@@ -130,4 +130,57 @@ final class TimerEngineTests: XCTestCase {
         XCTAssertEqual(engine.instances.filter { $0.state == .finished }.count, 1)
         XCTAssertEqual(engine.instances.filter { $0.state == .running }.count, 1)
     }
+
+    // MARK: Background survival
+
+    func test_handleBackground_persistsRunningInstances() {
+        engine.start(profile: makeProfile(duration: 60))
+        engine.handleBackground()
+        let loaded = InstancePersistence.load()
+        XCTAssertEqual(loaded.count, 1)
+        XCTAssertEqual(loaded[0].duration, 60)
+    }
+
+    func test_handleBackground_doesNotPersistFinishedInstances() {
+        engine.start(profile: makeProfile(duration: 60))
+        fixedNow = fixedNow.addingTimeInterval(61)
+        engine.tickForTesting()
+        engine.handleBackground()
+        XCTAssertEqual(InstancePersistence.load().count, 0)
+    }
+
+    func test_handleForeground_reconstructsRunningInstance() {
+        engine.start(profile: makeProfile(duration: 120))
+        let original = engine.instances[0]
+        engine.handleBackground()
+
+        // Simulate fresh engine (new foreground session)
+        engine = TimerEngine(scheduler: scheduler, clock: { [weak self] in self!.fixedNow })
+        engine.handleForeground()
+
+        XCTAssertEqual(engine.instances.count, 1)
+        XCTAssertEqual(engine.instances[0].id, original.id)
+        XCTAssertEqual(engine.instances[0].state, .running)
+    }
+
+    func test_handleForeground_marksExpiredInstanceFinished() {
+        engine.start(profile: makeProfile(duration: 60))
+        engine.handleBackground()
+
+        fixedNow = fixedNow.addingTimeInterval(90)
+        engine = TimerEngine(scheduler: scheduler, clock: { [weak self] in self!.fixedNow })
+        engine.handleForeground()
+
+        XCTAssertEqual(engine.instances.count, 1)
+        XCTAssertEqual(engine.instances[0].state, .finished)
+    }
+
+    func test_handleForeground_ignoresDuplicateIds() {
+        engine.start(profile: makeProfile(duration: 120))
+        engine.handleBackground()
+        // Call handleForeground twice — should not double-add
+        engine.handleForeground()
+        engine.handleForeground()
+        XCTAssertEqual(engine.instances.count, 1)
+    }
 }

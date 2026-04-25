@@ -115,10 +115,6 @@ extension TimerRowItem {
 
 // MARK: - Stubs (replaced in Tasks 12-14)
 
-struct AdHocSheet: View {
-    var body: some View { Text("Ad Hoc") }
-}
-
 struct ProfileEditorSheet: View {
     let profile: TimerProfile?
     var body: some View { Text("Profile Editor") }

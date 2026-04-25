@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "embedded",
+  "dolt_database": "timers",
+  "project_id": "b62c5ff1-827d-40a3-b2ea-3809c2af210d"
+}

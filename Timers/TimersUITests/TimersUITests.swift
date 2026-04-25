@@ -1,41 +1,54 @@
-//
-//  TimersUITests.swift
-//  TimersUITests
-//
-//  Created by David McKenzie on 4/25/26.
-//
-
+// TimersUITests/TimersUITests.swift
 import XCTest
 
 final class TimersUITests: XCTestCase {
 
+    var app: XCUIApplication!
+
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-
-        // In UI tests it is usually best to stop immediately when a failure occurs.
         continueAfterFailure = false
-
-        // In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.
-    }
-
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
-
-    @MainActor
-    func testExample() throws {
-        // UI tests must launch the application that they test.
-        let app = XCUIApplication()
+        app = XCUIApplication()
+        app.launchArguments = ["--uitesting"]
         app.launch()
-
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
     }
 
-    @MainActor
-    func testLaunchPerformance() throws {
-        // This measures how long it takes to launch your application.
-        measure(metrics: [XCTApplicationLaunchMetric()]) {
-            XCUIApplication().launch()
-        }
+    // MARK: - Ad Hoc Timer
+
+    func test_adHocTimer_startAndAppearInActiveSection() throws {
+        // Tap the timer (⏱) button in the nav bar
+        app.navigationBars["Timers"].buttons["timer"].tap()
+
+        // The ad hoc sheet should appear
+        XCTAssertTrue(app.navigationBars["Quick Timer"].waitForExistence(timeout: 2))
+
+        // Tap Start
+        app.navigationBars["Quick Timer"].buttons["Start"].tap()
+
+        // Sheet should dismiss and an instance row appear
+        XCTAssertFalse(app.navigationBars["Quick Timer"].exists)
+
+        // An instance row should appear (the default 1-min countdown)
+        XCTAssertTrue(app.staticTexts["Active"].waitForExistence(timeout: 2))
+    }
+
+    // MARK: - Saved Timer From Group
+
+    func test_savedTimer_tapProfileStartsInstance() throws {
+        // First, create a profile via the + button
+        app.navigationBars["Timers"].buttons["plus"].tap()
+        XCTAssertTrue(app.navigationBars["New Timer"].waitForExistence(timeout: 2))
+
+        let nameField = app.textFields["Timer name"]
+        nameField.tap()
+        nameField.typeText("Earl Grey")
+
+        app.navigationBars["New Timer"].buttons["Save"].tap()
+        XCTAssertFalse(app.navigationBars["New Timer"].exists)
+
+        // Tap the saved profile row to start it
+        app.staticTexts["Earl Grey"].tap()
+
+        // An "Active" section should appear
+        XCTAssertTrue(app.staticTexts["Active"].waitForExistence(timeout: 2))
     }
 }

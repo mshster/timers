@@ -5,6 +5,7 @@ struct PersistedInstance: Codable {
     let id: UUID
     let profileId: UUID?
     let displayName: String
+    let groupName: String?
     let duration: TimeInterval
     let startTime: Date
     let soundName: String
@@ -20,7 +21,8 @@ enum InstancePersistence {
     static func save(_ instances: [TimerInstance]) {
         let persisted = instances.map {
             PersistedInstance(id: $0.id, profileId: $0.profileId, displayName: $0.displayName,
-                              duration: $0.duration, startTime: $0.startTime, soundName: $0.soundName)
+                              groupName: $0.groupName, duration: $0.duration,
+                              startTime: $0.startTime, soundName: $0.soundName)
         }
         guard let data = try? JSONEncoder().encode(persisted) else { return }
         try? data.write(to: fileURL)

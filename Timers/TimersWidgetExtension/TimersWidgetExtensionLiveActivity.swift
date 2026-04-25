@@ -27,10 +27,16 @@ struct TimersLiveActivity: Widget {
             } compactLeading: {
                 Image(systemName: "timer")
                     .foregroundStyle(.green)
+                    .font(.caption2)
             } compactTrailing: {
-                CountdownLabel(context: context)
+                Text(context.state.endDate, style: .timer)
+                    .monospacedDigit()
+                    .font(.caption2)
+                    .frame(minWidth: 28, maxWidth: 44)
             } minimal: {
-                CountdownLabel(context: context)
+                Image(systemName: "timer")
+                    .foregroundStyle(.green)
+                    .font(.caption2)
             }
         }
     }
@@ -63,10 +69,18 @@ private struct CountdownLabel: View {
 private struct LockScreenView: View {
     let context: ActivityViewContext<TimerAttributes>
 
+    private var displayName: String {
+        if let group = context.attributes.groupName {
+            return "\(group) : \(context.attributes.profileName)"
+        }
+        return context.attributes.profileName
+    }
+
     var body: some View {
         HStack {
-            Label(context.attributes.profileName, systemImage: "timer")
+            Label(displayName, systemImage: "timer")
                 .font(.headline)
+                .lineLimit(1)
             Spacer()
             if context.state.isFinished {
                 Text("Done")

@@ -29,7 +29,8 @@ final class TimerEngine: NSObject {
         let sound = profile.soundName ?? defaultSoundName
         let instance = TimerInstance(
             id: UUID(), profileId: profile.id, displayName: profile.name,
-            duration: profile.duration, startTime: clock(), soundName: sound, state: .running
+            groupName: profile.group, duration: profile.duration,
+            startTime: clock(), soundName: sound, state: .running
         )
         addInstance(instance)
     }
@@ -37,7 +38,7 @@ final class TimerEngine: NSObject {
     func startAdHoc(duration: TimeInterval, soundName: String) {
         let instance = TimerInstance(
             id: UUID(), profileId: nil, displayName: formatDuration(duration),
-            duration: duration, startTime: clock(), soundName: soundName, state: .running
+            groupName: nil, duration: duration, startTime: clock(), soundName: soundName, state: .running
         )
         addInstance(instance)
     }
@@ -67,8 +68,9 @@ final class TimerEngine: NSObject {
             let elapsed = now.timeIntervalSince(p.startTime)
             let state: InstanceState = elapsed >= p.duration ? .finished : .running
             let instance = TimerInstance(id: p.id, profileId: p.profileId,
-                                         displayName: p.displayName, duration: p.duration,
-                                         startTime: p.startTime, soundName: p.soundName, state: state)
+                                         displayName: p.displayName, groupName: p.groupName,
+                                         duration: p.duration, startTime: p.startTime,
+                                         soundName: p.soundName, state: state)
             instances.append(instance)
         }
     }
@@ -127,6 +129,7 @@ final class TimerEngine: NSObject {
     private func startLiveActivity(for instance: TimerInstance) {
         guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
         let attributes = TimerAttributes(profileName: instance.displayName,
+                                         groupName: instance.groupName,
                                          totalDuration: instance.duration)
         let state = TimerAttributes.ContentState(
             endDate: instance.startTime.addingTimeInterval(instance.duration),

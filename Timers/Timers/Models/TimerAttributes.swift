@@ -10,5 +10,6 @@ struct TimerAttributes: ActivityAttributes {
     }
 
     let profileName: String
+    let groupName: String?
     let totalDuration: TimeInterval
 }

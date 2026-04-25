@@ -53,8 +53,8 @@ bd close <id>         # Complete work
 ## Build & Test
 
 ```bash
-xcodebuild -scheme Timers -destination 'platform=iOS Simulator,name=iPhone 16' build
-xcodebuild -scheme Timers -destination 'platform=iOS Simulator,name=iPhone 16' test
+xcodebuild -project Timers/Timers.xcodeproj -scheme Timers -destination 'platform=iOS Simulator,name=iPhone 17' build
+xcodebuild -project Timers/Timers.xcodeproj -scheme Timers -destination 'platform=iOS Simulator,name=iPhone 17' test
 ```
 
 ## Architecture Overview

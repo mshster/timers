@@ -52,18 +52,20 @@ bd close <id>         # Complete work
 
 ## Build & Test
 
-_Add your build and test commands here_
-
 ```bash
-# Example:
-# npm install
-# npm test
+xcodebuild -scheme Timers -destination 'platform=iOS Simulator,name=iPhone 16' build
+xcodebuild -scheme Timers -destination 'platform=iOS Simulator,name=iPhone 16' test
 ```
 
 ## Architecture Overview
 
-_Add a brief overview of your project architecture_
+iOS app (SwiftUI) — a personal timer app inspired by the Clock app's Timers tab, with a feature set tailored to the owner's daily use cases.
+
+- File-per-class organization (see global CLAUDE.md)
+- SwiftUI views, Combine or async/await for timer state
 
 ## Conventions & Patterns
 
-_Add your project-specific conventions here_
+- SwiftUI + Swift concurrency (async/await)
+- Minimum deployment target: TBD
+- No third-party dependencies unless clearly justified

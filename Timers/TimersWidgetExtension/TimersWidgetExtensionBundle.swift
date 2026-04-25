@@ -13,6 +13,6 @@ struct TimersWidgetExtensionBundle: WidgetBundle {
     var body: some Widget {
         TimersWidgetExtension()
         TimersWidgetExtensionControl()
-        TimersWidgetExtensionLiveActivity()
+        TimersLiveActivity()
     }
 }

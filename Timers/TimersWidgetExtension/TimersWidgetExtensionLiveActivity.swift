@@ -1,80 +1,83 @@
-//
-//  TimersWidgetExtensionLiveActivity.swift
-//  TimersWidgetExtension
-//
-//  Created by David McKenzie on 4/25/26.
-//
-
+// TimersWidgetExtension/TimersWidgetExtensionLiveActivity.swift
 import ActivityKit
 import WidgetKit
 import SwiftUI
 
-struct TimersWidgetExtensionAttributes: ActivityAttributes {
-    public struct ContentState: Codable, Hashable {
-        // Dynamic stateful properties about your activity go here!
-        var emoji: String
-    }
-
-    // Fixed non-changing properties about your activity go here!
-    var name: String
-}
-
-struct TimersWidgetExtensionLiveActivity: Widget {
+struct TimersLiveActivity: Widget {
     var body: some WidgetConfiguration {
-        ActivityConfiguration(for: TimersWidgetExtensionAttributes.self) { context in
-            // Lock screen/banner UI goes here
-            VStack {
-                Text("Hello \(context.state.emoji)")
-            }
-            .activityBackgroundTint(Color.cyan)
-            .activitySystemActionForegroundColor(Color.black)
-
+        ActivityConfiguration(for: TimerAttributes.self) { context in
+            LockScreenView(context: context)
         } dynamicIsland: { context in
             DynamicIsland {
-                // Expanded UI goes here.  Compose the expanded UI through
-                // various regions, like leading/trailing/center/bottom
                 DynamicIslandExpandedRegion(.leading) {
-                    Text("Leading")
+                    Label(context.attributes.profileName, systemImage: "timer")
+                        .font(.caption)
+                        .lineLimit(1)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    Text("Trailing")
+                    CountdownLabel(context: context)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    Text("Bottom \(context.state.emoji)")
-                    // more content
+                    ProgressView(
+                        value: progressValue(context: context),
+                        total: 1.0
+                    )
+                    .tint(.green)
                 }
             } compactLeading: {
-                Text("L")
+                Image(systemName: "timer")
+                    .foregroundStyle(.green)
             } compactTrailing: {
-                Text("T \(context.state.emoji)")
+                CountdownLabel(context: context)
             } minimal: {
-                Text(context.state.emoji)
+                CountdownLabel(context: context)
             }
-            .widgetURL(URL(string: "http://www.apple.com"))
-            .keylineTint(Color.red)
+        }
+    }
+
+    private func progressValue(context: ActivityViewContext<TimerAttributes>) -> Double {
+        guard !context.state.isFinished else { return 1.0 }
+        let elapsed = context.state.endDate.timeIntervalSinceNow
+        let remaining = max(0, elapsed)
+        return 1.0 - (remaining / context.attributes.totalDuration)
+    }
+}
+
+private struct CountdownLabel: View {
+    let context: ActivityViewContext<TimerAttributes>
+
+    var body: some View {
+        if context.state.isFinished {
+            Text("Done")
+                .font(.caption.bold())
+                .foregroundStyle(.green)
+        } else {
+            Text(context.state.endDate, style: .timer)
+                .font(.system(.caption, design: .monospaced).bold())
+                .monospacedDigit()
+                .foregroundStyle(.primary)
         }
     }
 }
 
-extension TimersWidgetExtensionAttributes {
-    fileprivate static var preview: TimersWidgetExtensionAttributes {
-        TimersWidgetExtensionAttributes(name: "World")
+private struct LockScreenView: View {
+    let context: ActivityViewContext<TimerAttributes>
+
+    var body: some View {
+        HStack {
+            Label(context.attributes.profileName, systemImage: "timer")
+                .font(.headline)
+            Spacer()
+            if context.state.isFinished {
+                Text("Done")
+                    .foregroundStyle(.green)
+                    .font(.headline.bold())
+            } else {
+                Text(context.state.endDate, style: .timer)
+                    .font(.system(.headline, design: .monospaced).bold())
+                    .monospacedDigit()
+            }
+        }
+        .padding()
     }
-}
-
-extension TimersWidgetExtensionAttributes.ContentState {
-    fileprivate static var smiley: TimersWidgetExtensionAttributes.ContentState {
-        TimersWidgetExtensionAttributes.ContentState(emoji: "😀")
-     }
-     
-     fileprivate static var starEyes: TimersWidgetExtensionAttributes.ContentState {
-         TimersWidgetExtensionAttributes.ContentState(emoji: "🤩")
-     }
-}
-
-#Preview("Notification", as: .content, using: TimersWidgetExtensionAttributes.preview) {
-   TimersWidgetExtensionLiveActivity()
-} contentStates: {
-    TimersWidgetExtensionAttributes.ContentState.smiley
-    TimersWidgetExtensionAttributes.ContentState.starEyes
 }

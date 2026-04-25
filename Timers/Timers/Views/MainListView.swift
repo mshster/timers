@@ -113,13 +113,3 @@ extension TimerRowItem {
     }
 }
 
-// MARK: - Stubs (replaced in Tasks 12-14)
-
-struct ProfileEditorSheet: View {
-    let profile: TimerProfile?
-    var body: some View { Text("Profile Editor") }
-}
-
-struct SettingsView: View {
-    var body: some View { Text("Settings") }
-}

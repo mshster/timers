@@ -10,6 +10,7 @@
 		2E91777C2F9D50B900C07DBB /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E91777B2F9D50B900C07DBB /* WidgetKit.framework */; };
 		2E91777E2F9D50B900C07DBB /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E91777D2F9D50B900C07DBB /* SwiftUI.framework */; };
 		2E91778D2F9D50B900C07DBB /* TimersWidgetExtensionExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 2E9177792F9D50B900C07DBB /* TimersWidgetExtensionExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		AA9177A12F9D50B900C07DBB /* TimerAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA9177A02F9D50B900C07DBB /* TimerAttributes.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,6 +58,7 @@
 		2E9177792F9D50B900C07DBB /* TimersWidgetExtensionExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TimersWidgetExtensionExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		2E91777B2F9D50B900C07DBB /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		2E91777D2F9D50B900C07DBB /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		AA9177A02F9D50B900C07DBB /* TimerAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TimerAttributes.swift; path = Timers/Models/TimerAttributes.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -168,6 +170,7 @@
 		2E9177932F9D50E400C07DBB /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				AA9177A02F9D50B900C07DBB /* TimerAttributes.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -393,6 +396,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA9177A12F9D50B900C07DBB /* TimerAttributes.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

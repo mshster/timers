@@ -9,19 +9,8 @@ struct TimersLiveActivity: Widget {
             LockScreenView(context: context)
         } dynamicIsland: { context in
             DynamicIsland {
-                DynamicIslandExpandedRegion(.leading) {
-                    Label(context.attributes.profileName, systemImage: "timer")
-                        .font(.caption)
-                        .lineLimit(1)
-                }
-                DynamicIslandExpandedRegion(.trailing) {
-                    HStack {
-                        Spacer(minLength: 0)
-                        CountdownLabel(context: context)
-                    }
-                }
                 DynamicIslandExpandedRegion(.bottom) {
-                    timerProgress(context: context)
+                    ExpandedBottomView(context: context)
                 }
             } compactLeading: {
                 Image(systemName: "timer")
@@ -39,6 +28,27 @@ struct TimersLiveActivity: Widget {
             }
         }
     }
+}
+
+// Expanded DI: .bottom region spans the full DI width, giving HStack a
+// real container so Spacer works and the countdown sits at the right edge.
+private struct ExpandedBottomView: View {
+    let context: ActivityViewContext<TimerAttributes>
+
+    var body: some View {
+        VStack(spacing: 6) {
+            HStack {
+                Label(context.attributes.profileName, systemImage: "timer")
+                    .font(.caption)
+                    .lineLimit(1)
+                Spacer(minLength: 8)
+                CountdownLabel(context: context)
+                    .frame(minWidth: 36, maxWidth: 66, alignment: .trailing)
+            }
+            timerProgress(context: context)
+        }
+        .padding(.horizontal, 4)
+    }
 
     @ViewBuilder
     private func timerProgress(context: ActivityViewContext<TimerAttributes>) -> some View {
@@ -46,8 +56,8 @@ struct TimersLiveActivity: Widget {
             ProgressView(value: 1.0, total: 1.0)
                 .tint(.green)
         } else {
-            let startDate = context.state.endDate.addingTimeInterval(-context.attributes.totalDuration)
-            ProgressView(timerInterval: startDate...context.state.endDate, countsDown: false) {
+            let start = context.state.endDate.addingTimeInterval(-context.attributes.totalDuration)
+            ProgressView(timerInterval: start...context.state.endDate, countsDown: false) {
                 EmptyView()
             } currentValueLabel: {
                 EmptyView()
@@ -74,6 +84,8 @@ private struct CountdownLabel: View {
     }
 }
 
+// Lock screen: timer text gets a bounded frame so it cannot inflate and
+// steal width from the label. Text is right-aligned within that frame.
 private struct LockScreenView: View {
     let context: ActivityViewContext<TimerAttributes>
 
@@ -89,7 +101,7 @@ private struct LockScreenView: View {
             Label(displayName, systemImage: "timer")
                 .font(.headline)
                 .lineLimit(1)
-            Spacer()
+            Spacer(minLength: 8)
             if context.state.isFinished {
                 Text("Done")
                     .foregroundStyle(.green)
@@ -98,7 +110,7 @@ private struct LockScreenView: View {
                 Text(context.state.endDate, style: .timer)
                     .font(.headline.bold())
                     .monospacedDigit()
-                    .fixedSize()
+                    .frame(minWidth: 60, maxWidth: 90, alignment: .trailing)
             }
         }
         .padding()

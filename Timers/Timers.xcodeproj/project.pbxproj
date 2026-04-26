@@ -44,7 +44,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				2E91778D2F9D50B900C07DBB /* TimersWidgetExtensionExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -213,7 +212,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				2E91778C2F9D50B900C07DBB /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				2E91774B2F9D505F00C07DBB /* Timers */,

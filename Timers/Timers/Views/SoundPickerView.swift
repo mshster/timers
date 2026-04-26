@@ -44,7 +44,9 @@ enum AvailableSounds {
                 }
                 name = name.prefix(1).uppercased() + name.dropFirst()
 
-                guard !name.isEmpty, !seen.contains(name.lowercased()) else { continue }
+                guard !name.isEmpty,
+                      !seen.contains(name.lowercased()),
+                      isApprovedName(name) else { continue }
                 seen.insert(name.lowercased())
                 discovered.append((displayName: name, filename: file))
             }
@@ -58,6 +60,16 @@ enum AvailableSounds {
     static let withInherit: [SoundOption] = [
         SoundOption(id: "", displayName: "Use default"),
     ] + all
+
+    // One uppercase letter + no dashes/underscores = a simple single-word name.
+    // Explicit exceptions are kept regardless.
+    private static func isApprovedName(_ name: String) -> Bool {
+        let exceptions: Set<String> = ["Choo_Choo", "News_Flash"]
+        if exceptions.contains(name) { return true }
+        return name.filter(\.isUppercase).count == 1
+            && !name.contains("-")
+            && !name.contains("_")
+    }
 
     static func filePath(for soundId: String) -> String? {
         for dir in searchDirs {

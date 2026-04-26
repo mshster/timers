@@ -41,7 +41,7 @@ private struct CountdownText: View {
     var body: some View {
         TimelineView(.periodic(from: .now, by: 1)) { _ in
             Text(formatRemaining(instance.remainingSeconds))
-                .font(.system(.body, design: .monospaced))
+                .font(.body)
                 .monospacedDigit()
         }
     }

@@ -15,9 +15,12 @@ final class LiveNotificationScheduler: NotificationScheduler {
         let content = UNMutableNotificationContent()
         content.title = displayName
         content.body = "Timer finished"
+        // soundName is either "default", a bare legacy name ("Radar"), or
+        // a filename-with-extension discovered at runtime ("sms_alert_bamboo.caf").
+        let soundFilename = soundName.contains(".") ? soundName : soundName + ".caf"
         content.sound = soundName == "default"
             ? .default
-            : UNNotificationSound(named: UNNotificationSoundName(rawValue: soundName + ".caf"))
+            : UNNotificationSound(named: UNNotificationSoundName(rawValue: soundFilename))
         content.userInfo = ["instanceId": instanceId.uuidString]
 
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: max(delay, 1), repeats: false)

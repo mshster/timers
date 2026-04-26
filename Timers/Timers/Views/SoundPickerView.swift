@@ -2,31 +2,70 @@ import SwiftUI
 import AudioToolbox
 
 struct SoundOption: Identifiable, Hashable {
-    let id: String          // "" means inherit global default; "default" means UNNotificationSound.default
+    // "" → inherit global default
+    // "default" → UNNotificationSound.default
+    // anything else → filename with extension (e.g. "sms_alert_bamboo.caf")
+    let id: String
     let displayName: String
 }
 
 enum AvailableSounds {
-    // Discovered once at first access from the iOS system audio directory.
-    // Only capitalized names are included — this excludes UI feedback sounds
-    // (lock.caf, keyboard_press_key.caf, etc.) while keeping alert tones.
-    // Falls back to just [Default] if the directory isn't readable.
+    private static let searchDirs = [
+        "/System/Library/Audio/UISounds",
+        "/System/Library/Audio/UISounds/Modern",
+        "/System/Library/Audio/UISounds/New",
+    ]
+    private static let audioExtensions: Set<String> = ["caf", "m4r"]
+    private static let stripPrefixes = ["sms_alert_", "calendar_alert_", "alarm_"]
+    private static let stripSuffixes = ["-EncoreInfinitum"]
+
+    // Discovered once at first access. Searches known system audio directories,
+    // strips housekeeping prefixes/suffixes, deduplicates by display name.
     static let all: [SoundOption] = {
+        var seen = Set<String>()
         var options = [SoundOption(id: "default", displayName: "Default")]
-        let dir = "/System/Library/Audio/UISounds"
-        if let files = try? FileManager.default.contentsOfDirectory(atPath: dir) {
-            let names = files
-                .filter { $0.hasSuffix(".caf") && $0.first?.isUppercase == true }
-                .map { String($0.dropLast(4)) }
-                .sorted()
-            options += names.map { SoundOption(id: $0, displayName: $0) }
+        seen.insert("default")
+
+        var discovered: [(displayName: String, filename: String)] = []
+
+        for dir in searchDirs {
+            guard let files = try? FileManager.default.contentsOfDirectory(atPath: dir) else { continue }
+            for file in files {
+                let ext = (file as NSString).pathExtension
+                guard audioExtensions.contains(ext) else { continue }
+
+                var name = (file as NSString).deletingPathExtension
+                for suffix in stripSuffixes where name.hasSuffix(suffix) {
+                    name = String(name.dropLast(suffix.count))
+                }
+                for prefix in stripPrefixes where name.hasPrefix(prefix) {
+                    name = String(name.dropFirst(prefix.count))
+                    break
+                }
+                name = name.prefix(1).uppercased() + name.dropFirst()
+
+                guard !name.isEmpty, !seen.contains(name.lowercased()) else { continue }
+                seen.insert(name.lowercased())
+                discovered.append((displayName: name, filename: file))
+            }
         }
+
+        discovered.sort { $0.displayName < $1.displayName }
+        options += discovered.map { SoundOption(id: $0.filename, displayName: $0.displayName) }
         return options
     }()
 
     static let withInherit: [SoundOption] = [
         SoundOption(id: "", displayName: "Use default"),
     ] + all
+
+    static func filePath(for soundId: String) -> String? {
+        for dir in searchDirs {
+            let path = "\(dir)/\(soundId)"
+            if FileManager.default.fileExists(atPath: path) { return path }
+        }
+        return nil
+    }
 }
 
 struct SoundPickerView: View {
@@ -53,12 +92,12 @@ struct SoundPickerView: View {
         case "":
             return
         case "default":
-            // kSystemSoundID_UserPreferredAlert plays whatever alert sound
-            // the user has selected in Settings > Sounds & Haptics.
-            AudioServicesPlaySystemSound(SystemSoundID(0x1000)) // kSystemSoundID_UserPreferredAlert
+            // kSystemSoundID_UserPreferredAlert — whatever the user set in Settings
+            AudioServicesPlaySystemSound(SystemSoundID(0x1000))
         default:
-            let url = URL(fileURLWithPath: "/System/Library/Audio/UISounds/\(soundId).caf")
+            guard let path = AvailableSounds.filePath(for: soundId) else { return }
             var sid: SystemSoundID = 0
+            let url = URL(fileURLWithPath: path)
             guard AudioServicesCreateSystemSoundID(url as CFURL, &sid) == kAudioServicesNoError else { return }
             AudioServicesPlayAlertSoundWithCompletion(sid) {
                 AudioServicesDisposeSystemSoundID(sid)

@@ -15,8 +15,10 @@ struct TimersLiveActivity: Widget {
                         .lineLimit(1)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    CountdownLabel(context: context)
-                        .frame(maxWidth: .infinity, alignment: .trailing)
+                    HStack {
+                        Spacer(minLength: 0)
+                        CountdownLabel(context: context)
+                    }
                 }
                 DynamicIslandExpandedRegion(.bottom) {
                     timerProgress(context: context)
@@ -83,24 +85,20 @@ private struct LockScreenView: View {
     }
 
     var body: some View {
-        ZStack {
-            HStack {
-                Label(displayName, systemImage: "timer")
-                    .font(.headline)
-                    .lineLimit(1)
-                Spacer()
-            }
-            HStack {
-                Spacer()
-                if context.state.isFinished {
-                    Text("Done")
-                        .foregroundStyle(.green)
-                        .font(.headline.bold())
-                } else {
-                    Text(context.state.endDate, style: .timer)
-                        .font(.headline.bold())
-                        .monospacedDigit()
-                }
+        HStack {
+            Label(displayName, systemImage: "timer")
+                .font(.headline)
+                .lineLimit(1)
+            Spacer()
+            if context.state.isFinished {
+                Text("Done")
+                    .foregroundStyle(.green)
+                    .font(.headline.bold())
+            } else {
+                Text(context.state.endDate, style: .timer)
+                    .font(.headline.bold())
+                    .monospacedDigit()
+                    .fixedSize()
             }
         }
         .padding()

@@ -1,34 +1,28 @@
 import SwiftUI
+import AudioToolbox
 
 struct SoundOption: Identifiable, Hashable {
-    let id: String          // "" means use global default; "default" means UNNotificationSound.default
+    let id: String          // "" means inherit global default; "default" means UNNotificationSound.default
     let displayName: String
 }
 
 enum AvailableSounds {
-    // Names map to <name>.caf in the iOS system audio library.
-    // "default" is handled specially → UNNotificationSound.default.
-    static let all: [SoundOption] = [
-        SoundOption(id: "default", displayName: "Default"),
-        SoundOption(id: "Apex",     displayName: "Apex"),
-        SoundOption(id: "Bamboo",   displayName: "Bamboo"),
-        SoundOption(id: "Chord",    displayName: "Chord"),
-        SoundOption(id: "Circles",  displayName: "Circles"),
-        SoundOption(id: "Complete", displayName: "Complete"),
-        SoundOption(id: "Hello",    displayName: "Hello"),
-        SoundOption(id: "Input",    displayName: "Input"),
-        SoundOption(id: "Keys",     displayName: "Keys"),
-        SoundOption(id: "Note",     displayName: "Note"),
-        SoundOption(id: "Popcorn",  displayName: "Popcorn"),
-        SoundOption(id: "Pulse",    displayName: "Pulse"),
-        SoundOption(id: "Radar",    displayName: "Radar"),
-        SoundOption(id: "Reflect",  displayName: "Reflect"),
-        SoundOption(id: "Summit",   displayName: "Summit"),
-        SoundOption(id: "Synth",    displayName: "Synth"),
-        SoundOption(id: "Twinkle",  displayName: "Twinkle"),
-        SoundOption(id: "Uplift",   displayName: "Uplift"),
-        SoundOption(id: "Waves",    displayName: "Waves"),
-    ]
+    // Discovered once at first access from the iOS system audio directory.
+    // Only capitalized names are included — this excludes UI feedback sounds
+    // (lock.caf, keyboard_press_key.caf, etc.) while keeping alert tones.
+    // Falls back to just [Default] if the directory isn't readable.
+    static let all: [SoundOption] = {
+        var options = [SoundOption(id: "default", displayName: "Default")]
+        let dir = "/System/Library/Audio/UISounds"
+        if let files = try? FileManager.default.contentsOfDirectory(atPath: dir) {
+            let names = files
+                .filter { $0.hasSuffix(".caf") && $0.first?.isUppercase == true }
+                .map { String($0.dropLast(4)) }
+                .sorted()
+            options += names.map { SoundOption(id: $0, displayName: $0) }
+        }
+        return options
+    }()
 
     static let withInherit: [SoundOption] = [
         SoundOption(id: "", displayName: "Use default"),
@@ -47,6 +41,27 @@ struct SoundPickerView: View {
         Picker("Sound", selection: $soundName) {
             ForEach(options) { option in
                 Text(option.displayName).tag(option.id)
+            }
+        }
+        .onChange(of: soundName) { _, newValue in
+            previewSound(newValue)
+        }
+    }
+
+    private func previewSound(_ soundId: String) {
+        switch soundId {
+        case "":
+            return
+        case "default":
+            // kSystemSoundID_UserPreferredAlert plays whatever alert sound
+            // the user has selected in Settings > Sounds & Haptics.
+            AudioServicesPlaySystemSound(SystemSoundID(0x1000)) // kSystemSoundID_UserPreferredAlert
+        default:
+            let url = URL(fileURLWithPath: "/System/Library/Audio/UISounds/\(soundId).caf")
+            var sid: SystemSoundID = 0
+            guard AudioServicesCreateSystemSoundID(url as CFURL, &sid) == kAudioServicesNoError else { return }
+            AudioServicesPlayAlertSoundWithCompletion(sid) {
+                AudioServicesDisposeSystemSoundID(sid)
             }
         }
     }

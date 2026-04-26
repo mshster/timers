@@ -18,13 +18,7 @@ struct TimersLiveActivity: Widget {
                     CountdownLabel(context: context)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    TimelineView(.periodic(from: .now, by: 1)) { _ in
-                        ProgressView(
-                            value: progressValue(context: context),
-                            total: 1.0
-                        )
-                        .tint(.green)
-                    }
+                    timerProgress(context: context)
                 }
             } compactLeading: {
                 Image(systemName: "timer")
@@ -43,11 +37,20 @@ struct TimersLiveActivity: Widget {
         }
     }
 
-    private func progressValue(context: ActivityViewContext<TimerAttributes>) -> Double {
-        guard !context.state.isFinished else { return 1.0 }
-        let elapsed = context.state.endDate.timeIntervalSinceNow
-        let remaining = max(0, elapsed)
-        return 1.0 - (remaining / context.attributes.totalDuration)
+    @ViewBuilder
+    private func timerProgress(context: ActivityViewContext<TimerAttributes>) -> some View {
+        if context.state.isFinished {
+            ProgressView(value: 1.0, total: 1.0)
+                .tint(.green)
+        } else {
+            let startDate = context.state.endDate.addingTimeInterval(-context.attributes.totalDuration)
+            ProgressView(timerInterval: startDate...context.state.endDate, countsDown: false) {
+                EmptyView()
+            } currentValueLabel: {
+                EmptyView()
+            }
+            .tint(.green)
+        }
     }
 }
 
@@ -83,7 +86,7 @@ private struct LockScreenView: View {
             Label(displayName, systemImage: "timer")
                 .font(.headline)
                 .lineLimit(1)
-            Spacer()
+                .frame(maxWidth: .infinity, alignment: .leading)
             if context.state.isFinished {
                 Text("Done")
                     .foregroundStyle(.green)
@@ -92,7 +95,6 @@ private struct LockScreenView: View {
                 Text(context.state.endDate, style: .timer)
                     .font(.headline.bold())
                     .monospacedDigit()
-                    .frame(minWidth: 72, alignment: .trailing)
             }
         }
         .padding()

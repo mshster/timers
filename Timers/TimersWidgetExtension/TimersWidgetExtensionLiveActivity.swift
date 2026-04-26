@@ -18,11 +18,13 @@ struct TimersLiveActivity: Widget {
                     CountdownLabel(context: context)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    ProgressView(
-                        value: progressValue(context: context),
-                        total: 1.0
-                    )
-                    .tint(.green)
+                    TimelineView(.periodic(from: .now, by: 1)) { _ in
+                        ProgressView(
+                            value: progressValue(context: context),
+                            total: 1.0
+                        )
+                        .tint(.green)
+                    }
                 }
             } compactLeading: {
                 Image(systemName: "timer")
@@ -59,7 +61,7 @@ private struct CountdownLabel: View {
                 .foregroundStyle(.green)
         } else {
             Text(context.state.endDate, style: .timer)
-                .font(.system(.caption, design: .monospaced).bold())
+                .font(.caption.bold())
                 .monospacedDigit()
                 .foregroundStyle(.primary)
         }
@@ -88,8 +90,9 @@ private struct LockScreenView: View {
                     .font(.headline.bold())
             } else {
                 Text(context.state.endDate, style: .timer)
-                    .font(.system(.headline, design: .monospaced).bold())
+                    .font(.headline.bold())
                     .monospacedDigit()
+                    .frame(minWidth: 72, alignment: .trailing)
             }
         }
         .padding()

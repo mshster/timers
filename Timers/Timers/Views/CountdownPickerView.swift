@@ -25,7 +25,7 @@ struct CountdownPickerView: UIViewRepresentable {
 
     final class Coordinator: NSObject, UIPickerViewDataSource, UIPickerViewDelegate {
         var parent: CountdownPickerView
-        private let units = ["hours", "min", "sec"]
+        private let units = ["hr", "min", "sec"]
         private let counts = [24, 60, 60]
 
         init(_ parent: CountdownPickerView) { self.parent = parent }
